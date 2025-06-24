@@ -19,7 +19,7 @@ import java.util.List;
  */
 public class ScriptUtil {
 
-    /**
+   /**
      * make script file
      *
      * @param scriptFileName
@@ -28,18 +28,25 @@ public class ScriptUtil {
      */
     public static void markScriptFile(String scriptFileName, String content) throws IOException {
         // make file,   filePath/gluesource/666-123456789.py
-        FileOutputStream fileOutputStream = null;
-        try {
-            fileOutputStream = new FileOutputStream(scriptFileName);
-            fileOutputStream.write(content.getBytes("UTF-8"));
-            fileOutputStream.close();
-        } catch (Exception e) {
-            throw e;
-        }finally{
-            if(fileOutputStream != null){
-                fileOutputStream.close();
+        try (FileOutputStream fos = new FileOutputStream(scriptFileName)) {
+            if(isWindows()) {
+                // 写入UTF-8 BOM
+                fos.write(0xEF);
+                fos.write(0xBB);
+                fos.write(0xBF);
             }
+            // 写入内容
+            fos.write(content.getBytes(StandardCharsets.UTF_8));
         }
+    }
+
+    /**
+     * 判断当前系统是否为Windows系列
+     * @return true:是Windows系统, false:非Windows系统
+     */
+    public static boolean isWindows() {
+        String osName = System.getProperty("os.name", "").toLowerCase(Locale.ENGLISH);
+        return osName.contains("windows");
     }
 
     /**
